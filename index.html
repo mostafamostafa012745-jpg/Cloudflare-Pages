@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لوحة تحكم مسابقة المليون</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body class="dark-mode">
+
+<!-- Network Status Bar -->
+<div id="networkBar" class="network-bar online">
+  <span id="networkIcon"><i class="fas fa-wifi"></i></span>
+  <span id="networkText">متصل بالشبكة</span>
+  <span id="serverLatency" class="latency">— ms</span>
+</div>
+
+<!-- Sidebar -->
+<aside id="sidebar" class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-wrap">
+      <div class="logo-icon"><i class="fas fa-star"></i></div>
+      <div class="logo-text">
+        <span class="logo-title">مليونير</span>
+        <span class="logo-sub">لوحة التحكم</span>
+      </div>
+    </div>
+    <button id="sidebarToggle" class="sidebar-toggle"><i class="fas fa-bars"></i></button>
+  </div>
+
+  <div class="sidebar-search">
+    <i class="fas fa-search"></i>
+    <input type="text" id="globalSearch" placeholder="بحث سريع..." autocomplete="off" />
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-group">
+      <span class="nav-group-label">الرئيسية</span>
+      <a href="#" class="nav-item active" data-page="dashboard">
+        <i class="fas fa-chart-pie"></i><span>لوحة التحكم</span>
+        <span class="nav-badge live">مباشر</span>
+      </a>
+    </div>
+
+    <div class="nav-group">
+      <span class="nav-group-label">إدارة المحتوى</span>
+      <a href="#" class="nav-item" data-page="questions">
+        <i class="fas fa-question-circle"></i><span>إدارة الأسئلة</span>
+      </a>
+      <a href="#" class="nav-item" data-page="media">
+        <i class="fas fa-photo-film"></i><span>مكتبة الوسائط</span>
+      </a>
+      <a href="#" class="nav-item" data-page="categories">
+        <i class="fas fa-tags"></i><span>الفئات والتصنيفات</span>
+      </a>
+    </div>
+
+    <div class="nav-group">
+      <span class="nav-group-label">إدارة اللعبة</span>
+      <a href="#" class="nav-item" data-page="gameplay">
+        <i class="fas fa-gamepad"></i><span>ميكانيكية اللعب</span>
+      </a>
+      <a href="#" class="nav-item" data-page="sounds">
+        <i class="fas fa-music"></i><span>أصوات اللعبة</span>
+      </a>
+      <a href="#" class="nav-item" data-page="appearance">
+        <i class="fas fa-palette"></i><span>تخصيص الواجهة</span>
+      </a>
+      <a href="#" class="nav-item" data-page="simulator">
+        <i class="fas fa-play-circle"></i><span>محاكي اللعبة</span>
+        <span class="nav-badge new">جديد</span>
+      </a>
+    </div>
+
+    <div class="nav-group">
+      <span class="nav-group-label">إدارة الطلاب</span>
+      <a href="#" class="nav-item" data-page="students">
+        <i class="fas fa-users"></i><span>قائمة الطلاب</span>
+      </a>
+      <a href="#" class="nav-item" data-page="leaderboard">
+        <i class="fas fa-trophy"></i><span>لوحة الصدارة</span>
+      </a>
+    </div>
+
+    <div class="nav-group">
+      <span class="nav-group-label">التحليلات</span>
+      <a href="#" class="nav-item" data-page="analytics">
+        <i class="fas fa-chart-line"></i><span>التحليلات المتقدمة</span>
+      </a>
+      <a href="#" class="nav-item" data-page="activitylog">
+        <i class="fas fa-history"></i><span>سجل الأنشطة</span>
+      </a>
+    </div>
+
+    <div class="nav-group">
+      <span class="nav-group-label">النظام</span>
+      <a href="#" class="nav-item" data-page="devtools">
+        <i class="fas fa-terminal"></i><span>أدوات المطور</span>
+      </a>
+      <a href="#" class="nav-item" data-page="settings">
+        <i class="fas fa-cog"></i><span>إعدادات النظام</span>
+      </a>
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="admin-badge">
+      <div class="admin-avatar">م</div>
+      <div class="admin-info">
+        <span class="admin-name">المدير العام</span>
+        <span class="admin-role">مشرف النظام</span>
+      </div>
+      <div class="admin-status"></div>
+    </div>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<main class="main-content" id="mainContent">
+
+  <!-- Top Bar -->
+  <header class="topbar">
+    <div class="topbar-right">
+      <button class="mobile-menu-btn" id="mobileMenuBtn"><i class="fas fa-bars"></i></button>
+      <div class="page-breadcrumb">
+        <span id="breadcrumbPage">لوحة التحكم</span>
+      </div>
+    </div>
+    <div class="topbar-left">
+      <div class="api-status-pill" id="apiStatusPill">
+        <span class="api-dot"></span>
+        <span id="apiStatusText">API</span>
+      </div>
+      <button class="icon-btn" id="themeToggle" title="تبديل الوضع">
+        <i class="fas fa-moon" id="themeIcon"></i>
+      </button>
+      <div class="notif-wrapper">
+        <button class="icon-btn" id="notifBtn">
+          <i class="fas fa-bell"></i>
+          <span class="notif-badge" id="notifCount">3</span>
+        </button>
+        <div class="notif-dropdown" id="notifDropdown">
+          <div class="notif-header"><span>الإشعارات</span><button id="clearNotif">مسح الكل</button></div>
+          <div class="notif-list" id="notifList"></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Page Container -->
+  <div class="page-container" id="pageContainer">
+
+    <!-- ===== DASHBOARD PAGE ===== -->
+    <div id="page-dashboard" class="page active">
+      <div class="page-header">
+        <h1 class="page-title">لوحة التحكم <span class="live-dot"></span></h1>
+        <div class="page-actions">
+          <button class="btn btn-ghost" onclick="APP.refreshDashboard()"><i class="fas fa-sync-alt"></i> تحديث</button>
+          <button class="btn btn-primary" onclick="APP.exportReport()"><i class="fas fa-download"></i> تصدير تقرير</button>
+        </div>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="stats-grid">
+        <div class="stat-card" id="statQuestions">
+          <div class="stat-icon questions"><i class="fas fa-question-circle"></i></div>
+          <div class="stat-body">
+            <div class="stat-value" id="totalQuestions">—</div>
+            <div class="stat-label">إجمالي الأسئلة</div>
+            <div class="stat-delta positive"><i class="fas fa-arrow-up"></i> +12 هذا الأسبوع</div>
+          </div>
+          <div class="stat-sparkline"><canvas id="sparkQ" width="80" height="40"></canvas></div>
+        </div>
+        <div class="stat-card" id="statStudents">
+          <div class="stat-icon students"><i class="fas fa-user-graduate"></i></div>
+          <div class="stat-body">
+            <div class="stat-value" id="totalStudents">—</div>
+            <div class="stat-label">إجمالي الطلاب</div>
+            <div class="stat-delta positive"><i class="fas fa-arrow-up"></i> +34 هذا الشهر</div>
+          </div>
+          <div class="stat-sparkline"><canvas id="sparkS" width="80" height="40"></canvas></div>
+        </div>
+        <div class="stat-card" id="statSessions">
+          <div class="stat-icon sessions"><i class="fas fa-gamepad"></i></div>
+          <div class="stat-body">
+            <div class="stat-value" id="totalSessions">—</div>
+            <div class="stat-label">جلسات اللعب</div>
+            <div class="stat-delta negative"><i class="fas fa-arrow-down"></i> -5% أمس</div>
+          </div>
+          <div class="stat-sparkline"><canvas id="sparkSe" width="80" height="40"></canvas></div>
+        </div>
+        <div class="stat-card" id="statActive">
+          <div class="stat-icon active"><i class="fas fa-bolt"></i></div>
+          <div class="stat-body">
+            <div class="stat-value" id="activeNow">—</div>
+            <div class="stat-label">نشط الآن</div>
+            <div class="stat-delta positive"><i class="fas fa-circle live-pulse"></i> مباشر</div>
+          </div>
+          <div class="stat-sparkline"><canvas id="sparkA" width="80" height="40"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="charts-row">
+        <div class="chart-card wide">
+          <div class="chart-header">
+            <h3>نشاط الجلسات (آخر 30 يوم)</h3>
+            <div class="chart-tabs">
+              <button class="chart-tab active" data-range="30">شهر</button>
+              <button class="chart-tab" data-range="7">أسبوع</button>
+              <button class="chart-tab" data-range="1">يوم</button>
+            </div>
+          </div>
+          <canvas id="activityChart" height="90"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header"><h3>توزيع الأسئلة</h3></div>
+          <canvas id="difficultyChart" height="180"></canvas>
+        </div>
+      </div>
+
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-header"><h3>أداء الطلاب</h3></div>
+          <canvas id="performanceChart" height="180"></canvas>
+        </div>
+        <div class="chart-card wide">
+          <div class="chart-header"><h3>آخر الأنشطة</h3></div>
+          <div class="activity-feed" id="activityFeed"></div>
+        </div>
+      </div>
+
+      <!-- API Status Monitor -->
+      <div class="api-monitor-card">
+        <h3><i class="fas fa-server"></i> مراقب حالة API</h3>
+        <div class="api-monitor-grid">
+          <div class="api-monitor-item">
+            <span class="api-m-label">حالة API</span>
+            <span class="api-m-val" id="monApiStatus"><span class="dot green"></span> متصل</span>
+          </div>
+          <div class="api-monitor-item">
+            <span class="api-m-label">زمن الاستجابة</span>
+            <span class="api-m-val" id="monLatency">— ms</span>
+          </div>
+          <div class="api-monitor-item">
+            <span class="api-m-label">آخر طلب ناجح</span>
+            <span class="api-m-val" id="monLastSuccess">—</span>
+          </div>
+          <div class="api-monitor-item">
+            <span class="api-m-label">آخر خطأ</span>
+            <span class="api-m-val" id="monLastError">لا يوجد</span>
+          </div>
+          <div class="api-monitor-item">
+            <span class="api-m-label">طلبات في الانتظار</span>
+            <span class="api-m-val" id="monQueue">0</span>
+          </div>
+          <div class="api-monitor-item">
+            <span class="api-m-label">وضع التشغيل</span>
+            <span class="api-m-val" id="monMode">تطوير</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== QUESTIONS PAGE ===== -->
+    <div id="page-questions" class="page">
+      <div class="page-header">
+        <h1 class="page-title">إدارة الأسئلة</h1>
+        <div class="page-actions">
+          <button class="btn btn-ghost" onclick="APP.importQuestions()"><i class="fas fa-file-import"></i> استيراد</button>
+          <button class="btn btn-ghost" onclick="APP.exportQuestions()"><i class="fas fa-file-export"></i> تصدير</button>
+          <button class="btn btn-primary" onclick="APP.openQuestionModal()"><i class="fas fa-plus"></i> سؤال جديد</button>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filter-bar">
+        <div class="filter-search">
+          <i class="fas fa-search"></i>
+          <input type="text" id="questionSearch" placeholder="بحث في الأسئلة..." />
+        </div>
+        <select class="filter-select" id="filterCategory">
+          <option value="">جميع الفئات</option>
+          <option>علوم</option><option>تاريخ</option><option>رياضيات</option>
+          <option>جغرافيا</option><option>رياضة</option><option>ثقافة عامة</option>
+        </select>
+        <select class="filter-select" id="filterDifficulty">
+          <option value="">جميع المستويات</option>
+          <option value="easy">سهل</option>
+          <option value="medium">متوسط</option>
+          <option value="hard">صعب</option>
+          <option value="expert">خبير</option>
+        </select>
+        <button class="btn btn-ghost" onclick="APP.bulkDelete()"><i class="fas fa-trash"></i> حذف محدد</button>
+      </div>
+
+      <!-- AI Tools Bar -->
+      <div class="ai-tools-bar">
+        <div class="ai-badge"><i class="fas fa-robot"></i> مساعد الذكاء الاصطناعي</div>
+        <button class="btn btn-ai" onclick="APP.aiSuggestQuestion()"><i class="fas fa-magic"></i> اقتراح سؤال</button>
+        <button class="btn btn-ai" onclick="APP.detectDuplicates()"><i class="fas fa-copy"></i> كشف التكرار</button>
+        <button class="btn btn-ai" onclick="APP.balanceDifficulty()"><i class="fas fa-balance-scale"></i> موازنة الصعوبة</button>
+        <button class="btn btn-ai" onclick="APP.autoCategorize()"><i class="fas fa-tags"></i> تصنيف تلقائي</button>
+      </div>
+
+      <!-- Questions Table -->
+      <div class="table-card">
+        <div class="table-info">
+          <span id="questionsCount">إجمالي: 0 سؤال</span>
+          <div class="table-actions">
+            <button class="icon-btn" onclick="APP.toggleView('questions','grid')" title="عرض شبكي"><i class="fas fa-th"></i></button>
+            <button class="icon-btn" onclick="APP.toggleView('questions','list')" title="عرض قائمة"><i class="fas fa-list"></i></button>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table class="data-table" id="questionsTable">
+            <thead>
+              <tr>
+                <th><input type="checkbox" id="selectAllQ" /></th>
+                <th>السؤال</th>
+                <th>الفئة</th>
+                <th>المستوى</th>
+                <th>المؤقت</th>
+                <th>وسائط</th>
+                <th>الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="questionsTbody">
+              <tr><td colspan="7" class="empty-state"><i class="fas fa-spinner fa-spin"></i> جاري التحميل...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination" id="questionsPagination"></div>
+      </div>
+    </div>
+
+    <!-- ===== MEDIA PAGE ===== -->
+    <div id="page-media" class="page">
+      <div class="page-header">
+        <h1 class="page-title">مكتبة الوسائط</h1>
+        <div class="page-actions">
+          <button class="btn btn-primary" onclick="APP.openUploadModal('image')"><i class="fas fa-image"></i> رفع صورة</button>
+          <button class="btn btn-primary" onclick="APP.openUploadModal('audio')"><i class="fas fa-music"></i> رفع صوت</button>
+        </div>
+      </div>
+
+      <!-- Upload Drop Zone -->
+      <div class="drop-zone" id="dropZone">
+        <div class="drop-zone-content">
+          <i class="fas fa-cloud-upload-alt"></i>
+          <p>اسحب وأفلت الملفات هنا</p>
+          <span>أو</span>
+          <button class="btn btn-ghost" onclick="document.getElementById('fileInput').click()">اختر ملفات</button>
+          <input type="file" id="fileInput" multiple accept="image/*,audio/*" hidden />
+          <p class="drop-hint">يدعم: JPG, PNG, GIF, MP3, WAV, OGG</p>
+        </div>
+      </div>
+
+      <!-- Media Filters -->
+      <div class="filter-bar">
+        <div class="filter-search"><i class="fas fa-search"></i><input type="text" id="mediaSearch" placeholder="بحث في الوسائط..." /></div>
+        <select class="filter-select" id="filterMediaType">
+          <option value="">جميع الأنواع</option>
+          <option value="image">صور</option>
+          <option value="audio">أصوات</option>
+        </select>
+        <button class="btn btn-ghost" onclick="APP.bulkDeleteMedia()"><i class="fas fa-trash"></i> حذف محدد</button>
+      </div>
+
+      <div class="media-grid" id="mediaGrid">
+        <div class="empty-state full"><i class="fas fa-photo-film fa-3x"></i><p>لا توجد وسائط بعد</p></div>
+      </div>
+    </div>
+
+    <!-- ===== GAMEPLAY PAGE ===== -->
+    <div id="page-gameplay" class="page">
+      <div class="page-header">
+        <h1 class="page-title">ميكانيكية اللعب</h1>
+        <div class="page-actions">
+          <button class="btn btn-primary" onclick="APP.saveGameplay()"><i class="fas fa-save"></i> حفظ الإعدادات</button>
+        </div>
+      </div>
+      <div class="settings-grid">
+        <!-- Prize Ladder -->
+        <div class="settings-card">
+          <h3><i class="fas fa-trophy"></i> سلم الجوائز</h3>
+          <div id="prizeLadder" class="prize-ladder"></div>
+          <button class="btn btn-ghost mt" onclick="APP.resetPrizeLadder()"><i class="fas fa-redo"></i> إعادة تعيين</button>
+        </div>
+        <!-- Timer Settings -->
+        <div class="settings-card">
+          <h3><i class="fas fa-stopwatch"></i> إعدادات المؤقت</h3>
+          <div class="form-group">
+            <label>وقت الإجابة الافتراضي (ثانية)</label>
+            <input type="number" class="form-input" id="defaultTimer" value="30" min="5" max="120" />
+          </div>
+          <div class="form-group">
+            <label>وقت إضافي للأسئلة الصعبة</label>
+            <input type="number" class="form-input" id="hardTimer" value="45" min="10" max="180" />
+          </div>
+          <div class="form-group">
+            <label>تحذير عند تبقي (ثانية)</label>
+            <input type="number" class="form-input" id="timerWarning" value="10" min="3" max="30" />
+          </div>
+        </div>
+        <!-- Lifelines -->
+        <div class="settings-card">
+          <h3><i class="fas fa-life-ring"></i> وسائل المساعدة</h3>
+          <div class="toggle-item">
+            <span><i class="fas fa-percentage"></i> المساعدة 50/50</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="lifeline5050" checked />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="toggle-item">
+            <span><i class="fas fa-users"></i> اسأل الجمهور</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="lifelineAudience" checked />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="toggle-item">
+            <span><i class="fas fa-phone"></i> اتصال بصديق</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="lifelineCall" checked />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+        <!-- Difficulty Distribution -->
+        <div class="settings-card">
+          <h3><i class="fas fa-sliders-h"></i> توزيع الصعوبة</h3>
+          <div class="form-group">
+            <label>سهل <span id="easyPct">30</span>%</label>
+            <input type="range" class="range-input" id="diffEasy" min="0" max="100" value="30" oninput="APP.updateDiffDist()" />
+          </div>
+          <div class="form-group">
+            <label>متوسط <span id="medPct">40</span>%</label>
+            <input type="range" class="range-input" id="diffMed" min="0" max="100" value="40" oninput="APP.updateDiffDist()" />
+          </div>
+          <div class="form-group">
+            <label>صعب <span id="hardPct">20</span>%</label>
+            <input type="range" class="range-input" id="diffHard" min="0" max="100" value="20" oninput="APP.updateDiffDist()" />
+          </div>
+          <div class="form-group">
+            <label>خبير <span id="expPct">10</span>%</label>
+            <input type="range" class="range-input" id="diffExp" min="0" max="100" value="10" oninput="APP.updateDiffDist()" />
+          </div>
+          <div class="diff-total" id="diffTotal">المجموع: 100%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SOUNDS PAGE ===== -->
+    <div id="page-sounds" class="page">
+      <div class="page-header">
+        <h1 class="page-title">إدارة أصوات اللعبة</h1>
+        <div class="page-actions">
+          <button class="btn btn-primary" onclick="APP.saveSounds()"><i class="fas fa-save"></i> حفظ</button>
+        </div>
+      </div>
+      <div class="sounds-grid" id="soundsGrid">
+        <!-- Generated by JS -->
+      </div>
+      <div class="settings-card mt">
+        <h3><i class="fas fa-volume-up"></i> مستوى الصوت العام</h3>
+        <div class="volume-control">
+          <i class="fas fa-volume-down"></i>
+          <input type="range" class="range-input" id="masterVolume" min="0" max="100" value="80" />
+          <i class="fas fa-volume-up"></i>
+          <span id="volumeDisplay">80%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== APPEARANCE PAGE ===== -->
+    <div id="page-appearance" class="page">
+      <div class="page-header">
+        <h1 class="page-title">تخصيص الواجهة</h1>
+        <div class="page-actions">
+          <button class="btn btn-ghost" onclick="APP.resetAppearance()"><i class="fas fa-undo"></i> إعادة تعيين</button>
+          <button class="btn btn-primary" onclick="APP.saveAppearance()"><i class="fas fa-save"></i> حفظ</button>
+        </div>
+      </div>
+      <div class="settings-grid">
+        <div class="settings-card">
+          <h3><i class="fas fa-palette"></i> ألوان التطبيق</h3>
+          <div class="color-grid">
+            <div class="color-item"><label>اللون الرئيسي</label><input type="color" class="color-input" id="colorPrimary" value="#f59e0b" /></div>
+            <div class="color-item"><label>اللون الثانوي</label><input type="color" class="color-input" id="colorSecondary" value="#8b5cf6" /></div>
+            <div class="color-item"><label>لون الخلفية</label><input type="color" class="color-input" id="colorBg" value="#0d1117" /></div>
+            <div class="color-item"><label>لون النص</label><input type="color" class="color-input" id="colorText" value="#ffffff" /></div>
+            <div class="color-item"><label>لون الأزرار</label><input type="color" class="color-input" id="colorBtn" value="#f59e0b" /></div>
+            <div class="color-item"><label>لون الصح</label><input type="color" class="color-input" id="colorCorrect" value="#22c55e" /></div>
+          </div>
+        </div>
+        <div class="settings-card">
+          <h3><i class="fas fa-font"></i> الخطوط</h3>
+          <div class="form-group">
+            <label>خط العنوان</label>
+            <select class="form-input" id="fontTitle">
+              <option value="Cairo">Cairo</option>
+              <option value="Tajawal">Tajawal</option>
+              <option value="Amiri">Amiri</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>حجم خط السؤال</label>
+            <input type="range" class="range-input" min="16" max="36" value="24" id="questionFontSize" />
+          </div>
+        </div>
+        <div class="settings-card">
+          <h3><i class="fas fa-moon"></i> الوضع المظلم / الفاتح</h3>
+          <div class="toggle-item big">
+            <span>الوضع المظلم</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="darkModeToggle" checked onchange="APP.toggleDarkMode(this.checked)" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="toggle-item big">
+            <span>تأثيرات الزجاج (Glassmorphism)</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="glassEffect" checked />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="toggle-item big">
+            <span>الرسوم المتحركة</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="animationsToggle" checked />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SIMULATOR PAGE ===== -->
+    <div id="page-simulator" class="page">
+      <div class="page-header">
+        <h1 class="page-title">محاكي اللعبة</h1>
+        <div class="page-actions">
+          <button class="btn btn-primary" onclick="APP.startSimulator()"><i class="fas fa-play"></i> بدء المحاكاة</button>
+          <button class="btn btn-ghost" onclick="APP.resetSimulator()"><i class="fas fa-redo"></i> إعادة تعيين</button>
+        </div>
+      </div>
+      <div class="simulator-container" id="simulatorContainer">
+        <div class="simulator-screen" id="simulatorScreen">
+          <div class="sim-header">
+            <div class="sim-logo"><i class="fas fa-star"></i> مليونير</div>
+            <div class="sim-prize" id="simCurrentPrize">اختر سؤالاً للبدء</div>
+          </div>
+          <div class="sim-question-area" id="simQuestionArea">
+            <div class="sim-question-text" id="simQuestionText">مرحباً بك في محاكي اللعبة</div>
+            <div class="sim-timer-ring" id="simTimerRing">
+              <svg viewBox="0 0 100 100">
+                <circle class="timer-bg" cx="50" cy="50" r="45"/>
+                <circle class="timer-progress" id="timerCircle" cx="50" cy="50" r="45"/>
+                <text x="50" y="58" class="timer-text" id="simTimerText">30</text>
+              </svg>
+            </div>
+          </div>
+          <div class="sim-answers" id="simAnswers">
+            <div class="sim-answer" id="simA">أ: —</div>
+            <div class="sim-answer" id="simB">ب: —</div>
+            <div class="sim-answer" id="simC">ج: —</div>
+            <div class="sim-answer" id="simD">د: —</div>
+          </div>
+          <div class="sim-lifelines" id="simLifelines">
+            <button class="lifeline-btn" onclick="APP.useLifeline('5050')" title="50/50"><span>50</span><span>/</span><span>50</span></button>
+            <button class="lifeline-btn" onclick="APP.useLifeline('audience')" title="اسأل الجمهور"><i class="fas fa-users"></i></button>
+            <button class="lifeline-btn" onclick="APP.useLifeline('phone')" title="اتصال بصديق"><i class="fas fa-phone"></i></button>
+          </div>
+        </div>
+        <div class="simulator-sidebar">
+          <h3>سلم الجوائز</h3>
+          <div class="sim-ladder" id="simLadder"></div>
+          <h3 style="margin-top:1rem">اختر سؤال للمحاكاة</h3>
+          <select class="form-input" id="simQuestionSelect">
+            <option value="">-- اختر سؤالاً --</option>
+          </select>
+          <button class="btn btn-primary mt" onclick="APP.loadSimQuestion()"><i class="fas fa-arrow-left"></i> تحميل السؤال</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== STUDENTS PAGE ===== -->
+    <div id="page-students" class="page">
+      <div class="page-header">
+        <h1 class="page-title">إدارة الطلاب</h1>
+        <div class="page-actions">
+          <button class="btn btn-ghost" onclick="APP.exportStudents()"><i class="fas fa-file-export"></i> تصدير</button>
+          <button class="btn btn-primary" onclick="APP.openStudentModal()"><i class="fas fa-user-plus"></i> إضافة طالب</button>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <div class="filter-search"><i class="fas fa-search"></i><input type="text" id="studentSearch" placeholder="بحث باسم الطالب أو البريد..." /></div>
+        <select class="filter-select" id="filterStudentLevel">
+          <option value="">جميع المستويات</option>
+          <option>مبتدئ</option><option>متوسط</option><option>متقدم</option><option>خبير</option>
+        </select>
+        <select class="filter-select" id="filterStudentStatus">
+          <option value="">جميع الحالات</option>
+          <option value="active">نشط</option>
+          <option value="banned">محظور</option>
+        </select>
+      </div>
+      <div class="table-card">
+        <div class="table-wrapper">
+          <table class="data-table" id="studentsTable">
+            <thead>
+              <tr>
+                <th><input type="checkbox" id="selectAllS" /></th>
+                <th>الطالب</th>
+                <th>البريد الإلكتروني</th>
+                <th>المستوى</th>
+                <th>الألعاب</th>
+                <th>أعلى نتيجة</th>
+                <th>الحالة</th>
+                <th>الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="studentsTbody">
+              <tr><td colspan="8" class="empty-state"><i class="fas fa-spinner fa-spin"></i> جاري التحميل...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination" id="studentsPagination"></div>
+      </div>
+    </div>
+
+    <!-- ===== LEADERBOARD PAGE ===== -->
+    <div id="page-leaderboard" class="page">
+      <div class="page-header">
+        <h1 class="page-title">لوحة الصدارة</h1>
+        <div class="page-actions">
+          <select class="filter-select" id="leaderboardSort">
+            <option value="score">ترتيب حسب النقاط</option>
+            <option value="wins">ترتيب حسب الفوز</option>
+            <option value="performance">ترتيب حسب الأداء</option>
+          </select>
+        </div>
+      </div>
+      <div class="leaderboard-podium" id="podium"></div>
+      <div class="leaderboard-list" id="leaderboardList"></div>
+    </div>
+
+    <!-- ===== ANALYTICS PAGE ===== -->
+    <div id="page-analytics" class="page">
+      <div class="page-header">
+        <h1 class="page-title">التحليلات المتقدمة</h1>
+        <div class="page-actions">
+          <button class="btn btn-ghost" onclick="APP.exportAnalytics()"><i class="fas fa-download"></i> تصدير</button>
+        </div>
+      </div>
+      <div class="charts-row">
+        <div class="chart-card wide">
+          <div class="chart-header"><h3>أداء الطلاب عبر الزمن</h3></div>
+          <canvas id="analyticsStudentChart" height="90"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header"><h3>نجاح الأسئلة حسب الفئة</h3></div>
+          <canvas id="analyticsCategoryChart" height="180"></canvas>
+        </div>
+      </div>
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-header"><h3>توزيع مستوى الصعوبة</h3></div>
+          <canvas id="analyticsDiffChart" height="180"></canvas>
+        </div>
+        <div class="chart-card wide">
+          <div class="chart-header"><h3>نشاط المستخدمين بالساعة</h3></div>
+          <canvas id="analyticsHourlyChart" height="90"></canvas>
+        </div>
+      </div>
+      <!-- AI Insights -->
+      <div class="ai-insights-card">
+        <div class="ai-badge"><i class="fas fa-robot"></i> رؤى الذكاء الاصطناعي</div>
+        <div class="ai-insights-grid" id="aiInsights">
+          <div class="ai-insight"><i class="fas fa-lightbulb"></i><p>تحليل الأداء يشير إلى أن الأسئلة العلمية لها نسبة نجاح أعلى من المتوسط بنسبة 23%</p></div>
+          <div class="ai-insight"><i class="fas fa-exclamation-triangle"></i><p>هناك نقص في الأسئلة على مستوى "خبير" — يُنصح بإضافة 15 سؤالاً جديداً</p></div>
+          <div class="ai-insight"><i class="fas fa-chart-bar"></i><p>أوقات الذروة: الساعة 7-9 مساءً تُسجّل أعلى نشاط للطلاب</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ACTIVITY LOG ===== -->
+    <div id="page-activitylog" class="page">
+      <div class="page-header">
+        <h1 class="page-title">سجل الأنشطة</h1>
+        <div class="page-actions">
+          <button class="btn btn-ghost" onclick="APP.clearLog()"><i class="fas fa-trash"></i> مسح السجل</button>
+          <button class="btn btn-ghost" onclick="APP.exportLog()"><i class="fas fa-download"></i> تصدير</button>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <div class="filter-search"><i class="fas fa-search"></i><input type="text" id="logSearch" placeholder="بحث في السجل..." /></div>
+        <select class="filter-select" id="logLevel">
+          <option value="">جميع المستويات</option>
+          <option value="info">معلومات</option>
+          <option value="warning">تحذير</option>
+          <option value="error">خطأ</option>
+          <option value="success">نجاح</option>
+        </select>
+      </div>
+      <div class="log-container" id="activityLogContainer"></div>
+    </div>
+
+    <!-- ===== DEV TOOLS PAGE ===== -->
+    <div id="page-devtools" class="page">
+      <div class="page-header">
+        <h1 class="page-title">أدوات المطور — وحدة اختبار API</h1>
+      </div>
+      <div class="devtools-layout">
+        <div class="devtools-panel">
+          <div class="form-group">
+            <label>طريقة الطلب</label>
+            <select class="form-input" id="devMethod">
+              <option>GET</option><option>POST</option><option>PUT</option><option>DELETE</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>المسار (Endpoint)</label>
+            <input type="text" class="form-input" id="devEndpoint" placeholder="/api/questions" />
+          </div>
+          <div class="form-group" id="devBodyGroup">
+            <label>جسم الطلب (JSON)</label>
+            <textarea class="form-input code-input" id="devBody" rows="6" placeholder='{"key": "value"}'></textarea>
+          </div>
+          <button class="btn btn-primary" onclick="APP.testApiRequest()"><i class="fas fa-paper-plane"></i> إرسال الطلب</button>
+          <div class="dev-presets">
+            <span>طلبات جاهزة:</span>
+            <button class="btn btn-ghost btn-sm" onclick="APP.loadPreset('questions')">الأسئلة</button>
+            <button class="btn btn-ghost btn-sm" onclick="APP.loadPreset('students')">الطلاب</button>
+            <button class="btn btn-ghost btn-sm" onclick="APP.loadPreset('stats')">الإحصائيات</button>
+          </div>
+        </div>
+        <div class="devtools-response">
+          <div class="response-header">
+            <span>الاستجابة</span>
+            <div class="response-meta">
+              <span id="devStatus" class="dev-status">—</span>
+              <span id="devTime" class="dev-time">— ms</span>
+            </div>
+          </div>
+          <pre id="devResponse" class="dev-response-area">// الاستجابة ستظهر هنا</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SETTINGS PAGE ===== -->
+    <div id="page-settings" class="page">
+      <div class="page-header">
+        <h1 class="page-title">إعدادات النظام</h1>
+        <div class="page-actions">
+          <button class="btn btn-primary" onclick="APP.saveSettings()"><i class="fas fa-save"></i> حفظ الإعدادات</button>
+        </div>
+      </div>
+      <div class="settings-grid">
+        <!-- Game Info -->
+        <div class="settings-card">
+          <h3><i class="fas fa-info-circle"></i> معلومات اللعبة</h3>
+          <div class="form-group"><label>اسم اللعبة</label><input type="text" class="form-input" id="gameName" value="مليونير" /></div>
+          <div class="form-group"><label>شعار اللعبة (URL)</label><input type="text" class="form-input" id="gameLogo" /></div>
+          <div class="form-group">
+            <label>وضع الصيانة</label>
+            <label class="toggle-switch">
+              <input type="checkbox" id="maintenanceMode" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+        <!-- API Config -->
+        <div class="settings-card highlight-card">
+          <h3><i class="fas fa-plug"></i> إعداد API</h3>
+          <div class="form-group">
+            <label>رابط API الأساسي</label>
+            <input type="text" class="form-input" id="apiBaseUrl" placeholder="https://api.example.com" />
+          </div>
+          <div class="form-group">
+            <label>نقطة نهاية قاعدة البيانات</label>
+            <input type="text" class="form-input" id="dbEndpoint" placeholder="/v1" />
+          </div>
+          <div class="form-group">
+            <label>رمز المصادقة (Token)</label>
+            <div class="input-with-btn">
+              <input type="password" class="form-input" id="authToken" placeholder="Bearer token..." />
+              <button class="btn btn-ghost" onclick="APP.toggleTokenVisibility()"><i class="fas fa-eye" id="tokenEye"></i></button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>بيئة التشغيل</label>
+            <select class="form-input" id="envMode">
+              <option value="development">تطوير</option>
+              <option value="production">إنتاج</option>
+              <option value="testing">اختبار</option>
+            </select>
+          </div>
+          <div class="api-test-section">
+            <button class="btn btn-primary" onclick="APP.testApiConnection()">
+              <i class="fas fa-vial"></i> اختبار الاتصال
+            </button>
+            <div id="apiTestResult" class="api-test-result"></div>
+          </div>
+        </div>
+        <!-- Security -->
+        <div class="settings-card">
+          <h3><i class="fas fa-shield-alt"></i> الأمان والصلاحيات</h3>
+          <div class="toggle-item"><span>مصادقة JWT</span><label class="toggle-switch"><input type="checkbox" id="jwtAuth" checked /><span class="toggle-slider"></span></label></div>
+          <div class="toggle-item"><span>حماية من الطلبات الزائدة</span><label class="toggle-switch"><input type="checkbox" id="rateLimit" checked /><span class="toggle-slider"></span></label></div>
+          <div class="toggle-item"><span>تشفير الطلبات</span><label class="toggle-switch"><input type="checkbox" id="encryptReq" /><span class="toggle-slider"></span></label></div>
+          <div class="form-group mt">
+            <label>صلاحية الجلسة (دقيقة)</label>
+            <input type="number" class="form-input" id="sessionTimeout" value="60" />
+          </div>
+        </div>
+        <!-- Backup -->
+        <div class="settings-card">
+          <h3><i class="fas fa-database"></i> النسخ الاحتياطي</h3>
+          <div class="toggle-item"><span>نسخ احتياطي تلقائي</span><label class="toggle-switch"><input type="checkbox" id="autoBackup" checked /><span class="toggle-slider"></span></label></div>
+          <div class="form-group">
+            <label>تكرار النسخ الاحتياطي</label>
+            <select class="form-input" id="backupFreq">
+              <option>يومياً</option><option>أسبوعياً</option><option>شهرياً</option>
+            </select>
+          </div>
+          <button class="btn btn-ghost mt" onclick="APP.manualBackup()"><i class="fas fa-download"></i> نسخ احتياطي الآن</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== CATEGORIES PAGE ===== -->
+    <div id="page-categories" class="page">
+      <div class="page-header">
+        <h1 class="page-title">الفئات والتصنيفات</h1>
+        <div class="page-actions">
+          <button class="btn btn-primary" onclick="APP.openCategoryModal()"><i class="fas fa-plus"></i> فئة جديدة</button>
+        </div>
+      </div>
+      <div class="categories-grid" id="categoriesGrid"></div>
+    </div>
+
+  </div><!-- end page-container -->
+</main>
+
+<!-- ===== MODALS ===== -->
+
+<!-- Question Modal -->
+<div class="modal-overlay" id="questionModal">
+  <div class="modal large">
+    <div class="modal-header">
+      <h2 id="questionModalTitle">إضافة سؤال جديد</h2>
+      <button class="modal-close" onclick="APP.closeModal('questionModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-tabs">
+        <button class="form-tab active" data-tab="basic">الأساسيات</button>
+        <button class="form-tab" data-tab="answers">الإجابات</button>
+        <button class="form-tab" data-tab="media">الوسائط</button>
+        <button class="form-tab" data-tab="advanced">متقدم</button>
+      </div>
+      <div class="form-tab-content active" id="tab-basic">
+        <div class="form-group"><label>نص السؤال *</label><textarea class="form-input" id="qText" rows="3" placeholder="أدخل نص السؤال هنا..."></textarea></div>
+        <div class="form-row">
+          <div class="form-group"><label>الفئة *</label>
+            <select class="form-input" id="qCategory"><option>علوم</option><option>تاريخ</option><option>رياضيات</option><option>جغرافيا</option><option>رياضة</option><option>ثقافة عامة</option></select>
+          </div>
+          <div class="form-group"><label>مستوى الصعوبة *</label>
+            <select class="form-input" id="qDifficulty"><option value="easy">سهل</option><option value="medium">متوسط</option><option value="hard">صعب</option><option value="expert">خبير</option></select>
+          </div>
+          <div class="form-group"><label>المؤقت (ثانية)</label><input type="number" class="form-input" id="qTimer" value="30" min="5" max="120" /></div>
+        </div>
+      </div>
+      <div class="form-tab-content" id="tab-answers">
+        <div class="answers-form">
+          <div class="answer-option"><span class="ans-label correct-label">أ</span><input type="text" class="form-input" id="qA" placeholder="الإجابة الأولى (الصحيحة)" /><label class="toggle-switch sm"><input type="radio" name="correct" value="A" checked /><span class="toggle-slider"></span></label></div>
+          <div class="answer-option"><span class="ans-label">ب</span><input type="text" class="form-input" id="qB" placeholder="الإجابة الثانية" /><label class="toggle-switch sm"><input type="radio" name="correct" value="B" /><span class="toggle-slider"></span></label></div>
+          <div class="answer-option"><span class="ans-label">ج</span><input type="text" class="form-input" id="qC" placeholder="الإجابة الثالثة" /><label class="toggle-switch sm"><input type="radio" name="correct" value="C" /><span class="toggle-slider"></span></label></div>
+          <div class="answer-option"><span class="ans-label">د</span><input type="text" class="form-input" id="qD" placeholder="الإجابة الرابعة" /><label class="toggle-switch sm"><input type="radio" name="correct" value="D" /><span class="toggle-slider"></span></label></div>
+        </div>
+        <div class="form-group mt"><label>شرح الإجابة الصحيحة</label><textarea class="form-input" id="qExplanation" rows="2" placeholder="شرح اختياري للإجابة الصحيحة..."></textarea></div>
+      </div>
+      <div class="form-tab-content" id="tab-media">
+        <div class="form-row">
+          <div class="form-group"><label>صورة للسؤال (URL)</label><input type="text" class="form-input" id="qImage" placeholder="https://..." /><div class="media-preview" id="qImagePreview"></div></div>
+          <div class="form-group"><label>صوت للسؤال (URL)</label><input type="text" class="form-input" id="qAudio" placeholder="https://..." /><div id="qAudioPreview"></div></div>
+        </div>
+      </div>
+      <div class="form-tab-content" id="tab-advanced">
+        <div class="form-group"><label>نقاط السؤال</label><input type="number" class="form-input" id="qPoints" value="1000" /></div>
+        <div class="form-group"><label>تلميح</label><input type="text" class="form-input" id="qHint" placeholder="تلميح اختياري..." /></div>
+        <div class="form-group"><label>العلامات (tags)</label><input type="text" class="form-input" id="qTags" placeholder="علوم, حيوانات, طبيعة..." /></div>
+        <div class="toggle-item"><span>نشط</span><label class="toggle-switch"><input type="checkbox" id="qActive" checked /><span class="toggle-slider"></span></label></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="APP.previewQuestion()"><i class="fas fa-eye"></i> معاينة</button>
+      <button class="btn btn-ghost" onclick="APP.closeModal('questionModal')">إلغاء</button>
+      <button class="btn btn-primary" onclick="APP.saveQuestion()"><i class="fas fa-save"></i> حفظ السؤال</button>
+    </div>
+  </div>
+</div>
+
+<!-- Student Modal -->
+<div class="modal-overlay" id="studentModal">
+  <div class="modal large">
+    <div class="modal-header">
+      <h2 id="studentModalTitle">ملف الطالب</h2>
+      <button class="modal-close" onclick="APP.closeModal('studentModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" id="studentModalBody">
+      <div class="student-profile-header">
+        <div class="student-big-avatar" id="studentAvatar">ط</div>
+        <div class="student-profile-info">
+          <div class="form-row">
+            <div class="form-group"><label>الاسم الكامل</label><input type="text" class="form-input" id="sName" /></div>
+            <div class="form-group"><label>البريد الإلكتروني</label><input type="text" class="form-input" id="sEmail" /></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>المستوى</label>
+              <select class="form-input" id="sLevel"><option>مبتدئ</option><option>متوسط</option><option>متقدم</option><option>خبير</option></select>
+            </div>
+            <div class="form-group"><label>الحالة</label>
+              <select class="form-input" id="sStatus"><option value="active">نشط</option><option value="banned">محظور</option></select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="student-stats-row" id="studentStatsRow"></div>
+      <div class="student-actions-bar">
+        <button class="btn btn-warning" onclick="APP.banStudent()"><i class="fas fa-ban"></i> حظر</button>
+        <button class="btn btn-ghost" onclick="APP.resetStudentProgress()"><i class="fas fa-redo"></i> إعادة تعيين التقدم</button>
+        <button class="btn btn-ghost" onclick="APP.resetStudentPassword()"><i class="fas fa-key"></i> إعادة كلمة المرور</button>
+        <button class="btn btn-ghost" onclick="APP.sendStudentNotification()"><i class="fas fa-bell"></i> إرسال إشعار</button>
+        <button class="btn btn-danger" onclick="APP.deleteStudent()"><i class="fas fa-trash"></i> حذف الحساب</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="APP.closeModal('studentModal')">إغلاق</button>
+      <button class="btn btn-primary" onclick="APP.saveStudent()"><i class="fas fa-save"></i> حفظ التعديلات</button>
+    </div>
+  </div>
+</div>
+
+<!-- Preview Modal -->
+<div class="modal-overlay" id="previewModal">
+  <div class="modal game-preview-modal">
+    <div class="modal-header">
+      <h2>معاينة السؤال في اللعبة</h2>
+      <button class="modal-close" onclick="APP.closeModal('previewModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="game-preview-screen" id="gamePreviewScreen"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="toast-container"></div>
+
+<!-- Offline Banner -->
+<div id="offlineBanner" class="offline-banner hidden">
+  <i class="fas fa-wifi-slash"></i>
+  <span>أنت غير متصل بالإنترنت — يعمل النظام في الوضع المحدود</span>
+  <span id="queueCount" class="queue-badge">0 عملية في الانتظار</span>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
