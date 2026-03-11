@@ -989,3 +989,21 @@ SUPABASE_KEY
 console.log("Supabase connected")
 
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const SUPABASE_URL = "https://rgtnduyvkgyyaqwkldpt.supabase.co"
+
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJndG5kdXl2a2d5eWFxd2tsZHB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNDQxNjgsImV4cCI6MjA4ODcyMDE2OH0.5k8f7RpWIgn587SKtmBF2jyBxPbKeGkBor4U0xyB53s"
+
+const supabase = window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+)
+
+document.body.innerHTML += "<h2>تم الاتصال بقاعدة البيانات</h2>"
+
+</script>
+
+</body>
